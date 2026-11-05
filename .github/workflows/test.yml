@@ -22,7 +22,7 @@ jobs:
           node --check index.js
 
       - name: Render smoke tests
-        run: node --test tests/
+        run: node --test tests/*.test.mjs
 
       - name: Manifest sanity
         run: |
