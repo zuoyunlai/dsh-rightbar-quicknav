@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Syntax check
+        run: |
+          node --check client.js
+          node --check index.js
+
+      - name: Render smoke tests
+        run: node --test tests/
+
+      - name: Manifest sanity
+        run: |
+          node -e "const j=require('./package.json'); for (const k of ['name','version','license','dsh']) if (!j[k]) { console.error('missing '+k); process.exit(1) } console.log('manifest ok', j.name, j.version)"
