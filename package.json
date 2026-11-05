@@ -32,7 +32,8 @@
     "AUDIT-2026-11-06.md",
     "AUDIT-a11y.md",
     "AUDIT-perf.md",
-    "AUDIT-2026-11-06-REMEDIATION.md"
+    "AUDIT-2026-11-06-REMEDIATION.md",
+    "CATALOG-SUBMISSIONS.md"
   ],
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.0",
