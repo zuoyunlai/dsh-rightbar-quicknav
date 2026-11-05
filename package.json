@@ -1,0 +1,105 @@
+{
+  "name": "dsh-rightbar-quicknav",
+  "version": "0.3.6",
+  "description": "DSH 右侧栏快捷导航：在顶栏展开右侧栏图标正下方常驻一条竖排图标轨，只显示标签图标（文件 / Git / 任务管理 / 图像工作台…），悬停出标题，点击直达该标签。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./index.js": "./index.js",
+    "./client": "./client.js",
+    "./client.js": "./client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "icon.svg",
+    "locale",
+    "tests/*.mjs",
+    "README.md",
+    "README-zh.md",
+    "README-ja.md",
+    "README-es.md",
+    "README-pt.md",
+    "README-hi.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "AUDIT-2026-11-06.md",
+    "AUDIT-a11y.md",
+    "AUDIT-perf.md",
+    "AUDIT-2026-11-06-REMEDIATION.md"
+  ],
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.0",
+    "@deepseek-ai/dsh-client-ui-sidebar-right": "^0.2.1-rc.1",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.2.1-rc.1",
+    "react": ">=18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-sidebar-right": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-slots": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0",
+    "dsh": ">=0.2.1-rc.1"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-ui-slots"
+      ]
+    },
+    "manifestVersion": 1
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "sidebar",
+    "quicknav",
+    "rightbar"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "zuoyunlai",
+    "url": "https://github.com/zuoyunlai"
+  },
+  "packageManager": "pnpm@11.28.5",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "check": "node --check client.js && node --check index.js",
+    "test": "node --test tests/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zuoyunlai/dsh-rightbar-quicknav.git"
+  },
+  "homepage": "https://github.com/zuoyunlai/dsh-rightbar-quicknav#readme",
+  "bugs": {
+    "url": "https://github.com/zuoyunlai/dsh-rightbar-quicknav/issues"
+  }
+}

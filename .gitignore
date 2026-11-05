@@ -1,0 +1,20 @@
+# 依赖与产物
+node_modules/
+*.tgz
+dist/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 临时与调试
+*.log
+*.bak
+.audit-tmp/
+_*.mjs
+
+# 本地 profile 联动（开发时 pnpm link 会生成）
+pnpm-lock.yaml
