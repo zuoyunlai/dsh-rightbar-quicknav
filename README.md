@@ -77,6 +77,27 @@ node --test tests/         # render smoke tests (zero dependencies)
 
 The render smoke test loads the real `client.js`, drives the plugin's own `apply() → slots.inject → slots.register` path with a minimal React stub, and asserts that rendering and effects do not throw. It exists because a single undefined identifier in an effect once made the whole rail silently disappear.
 
+## Releasing
+
+Releases are published **by CI, never from a developer machine**.
+
+1. bump `version` in `package.json` **and** the `VERSION` constant in `client.js` — they must match
+2. add a `## [x.y.z]` section to [`CHANGELOG.md`](CHANGELOG.md)
+3. commit to `main`
+4. `git tag vX.Y.Z && git push origin vX.Y.Z`
+
+Pushing the tag runs [`.github/workflows/publish.yml`](.github/workflows/publish.yml), which:
+
+- asserts tag == `package.json` version == `client.js` `VERSION` (`scripts/verify-version.mjs`)
+- runs the syntax check and tests
+- publishes with **npm Trusted Publishing (OIDC)** plus a provenance statement — no `NPM_TOKEN`, no 2FA prompt
+- **waits until npm actually serves the version**: `npm publish` reports success while the version is still in npm's processing queue, so a green job that stopped there would be a false positive
+- packs the tarball and creates the GitHub Release from the matching CHANGELOG section
+
+Local `npm publish` is intentionally unavailable for this package: its publishing access requires 2FA and disallows bypass-2FA tokens, so a local publish only lands in npm's queue.
+
+If `github.com:443` is unreachable from your machine, `node scripts/push-via-api.mjs` pushes the same tree through the Git Data API (identical tree hash, different commit SHA).
+
 ## License
 
 MIT

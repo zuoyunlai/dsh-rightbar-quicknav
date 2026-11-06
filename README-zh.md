@@ -77,6 +77,28 @@ node --test tests/         # 渲染冒烟测试（零依赖）
 
 渲染冒烟测试会加载真实的 `client.js`，用最小 React 桩驱动插件自己的 `apply() → slots.inject → slots.register` 路径，断言渲染与 effect 都不抛错。它存在的原因很直接：曾经 effect 里一个未定义标识符，就让整条轨道静默消失了。
 
+## 发版
+
+**只从 CI 发布，不从开发者本机发布。**
+
+1. 同时改 `package.json` 的 `version` 与 `client.js` 里的 `VERSION` 常量 —— 两者必须一致
+2. 在 [`CHANGELOG.md`](CHANGELOG.md) 加一节 `## [x.y.z]`
+3. 提交到 `main`
+4. `git tag vX.Y.Z && git push origin vX.Y.Z`
+
+推送 tag 会触发 [`.github/workflows/publish.yml`](.github/workflows/publish.yml)：
+
+- 断言 tag == `package.json` 版本 == `client.js` 的 `VERSION`（`scripts/verify-version.mjs`）
+- 跑语法检查与测试
+- 用 **npm Trusted Publishing（OIDC）** 发布并生成来源证明 —— 不需要 `NPM_TOKEN`，也不会弹 2FA
+- **等 npm 真的提供该版本**：`npm publish` 在 npm 处理队列期间同样会返回成功，
+  少了这道等待就会出现「workflow 绿了、npm 上查不到」的假成功
+- 打包 tgz，并从 CHANGELOG 对应小节生成 GitHub Release
+
+本包**故意关闭了本机 `npm publish`**：发布权限要求 2FA 且禁止 bypass-2FA token，本机发布只会落进 npm 的队列。
+
+如果本机 `github.com:443` 连不上，用 `node scripts/push-via-api.mjs` 走 Git Data API 推送（tree 哈希相同，提交 SHA 不同）。
+
 ## 许可
 
 MIT
