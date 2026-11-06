@@ -45,7 +45,7 @@ window.__ModuleLoader__.load({
     /* ================= 常量 ================= */
 
     const TAG = '[dsh-rightbar-quicknav]'
-    const VERSION = '0.3.7'
+    const VERSION = '0.3.8'
 
     /** 每格图标按钮边长 / 轨道内边距 / 图标本身。 */
     const ITEM = 26
@@ -229,12 +229,114 @@ window.__ModuleLoader__.load({
       )
     }
 
-    /** 外部条目图标：抛错时回落立方体。 */
-    function safeIcon(IconComp, size) {
+    /* ============ 语义默认图标（条目自身没带图标时使用） ============ */
+
+    /**
+     * 图标形状表：统一 16×16 视框、stroke=currentColor、1.25 描边，
+     * 与宿主图标同视觉语言（矢量、无依赖、跟随文字色）。
+     * rects: [x,y,w,h,rx] / circles: [cx,cy,r] / paths: [d,...]
+     */
+    const GLYPH = {
+      image: { rects: [[1.6, 2.6, 12.8, 10.8, 2]], circles: [[5.2, 6.1, 1.05]], paths: ['M2.2 11.9l3.3-3 2.3 1.8 2.3-2.3 3.3 3.1'] },
+      file: { paths: ['M4.2 2h4.6L12 5.2V14H4.2z', 'M8.6 2v3.3H12'] },
+      folder: { paths: ['M2 4.6h4.1l1.5 1.9H14V13H2z'] },
+      git: { circles: [[4.8, 3.6, 1.3], [4.8, 12.4, 1.3], [11.2, 6.2, 1.3]], paths: ['M4.8 4.9v6.2', 'M11.2 7.5v.9a2.4 2.4 0 0 1-2.4 2.4H6.1'] },
+      terminal: { rects: [[1.6, 3, 12.8, 10, 2]], paths: ['M4.6 6.6l1.9 1.7-1.9 1.7', 'M8.6 10.4h3'] },
+      tasks: { paths: ['M2.8 4.3l1.3 1.3 2-2.1', 'M2.8 11l1.3 1.3 2-2.1', 'M9 4.8h4.2', 'M9 11.5h4.2'] },
+      globe: { circles: [[8, 8, 6.1]], paths: ['M1.9 8h12.2', 'M8 1.9c2.3 2.5 2.3 9.7 0 12.2', 'M8 1.9c-2.3 2.5-2.3 9.7 0 12.2'] },
+      search: { circles: [[7, 7, 4.1]], paths: ['M10.1 10.1L14 14'] },
+      chart: { paths: ['M2.4 13.2h11.2', 'M4.6 13V8.4', 'M8 13V4.6', 'M11.4 13V6.6'] },
+      code: { paths: ['M5.6 5.2L2.6 8l3 2.8', 'M10.4 5.2l3 2.8-3 2.8', 'M9.2 3.2L6.8 12.8'] },
+      chat: { paths: ['M2.6 3.6h10.8v7.1H7.3L3.9 13.6v-2.9H2.6z'] },
+      doc: { paths: ['M3 3.2h10', 'M3 6.6h10', 'M3 10h6.6', 'M3 13.2h4'] },
+      sparkle: { paths: ['M8 2l1.5 4.5L14 8l-4.5 1.5L8 14l-1.5-4.5L2 8l4.5-1.5z'] },
+      plug: { paths: ['M6 2v3.6', 'M10 2v3.6', 'M4.2 5.6h7.6v2.9a3.8 3.8 0 0 1-7.6 0z', 'M8 12.3V14'] },
+      sliders: { circles: [[6, 5.1, 1.5], [10.2, 10.9, 1.5]], paths: ['M2.2 5.1h2.3', 'M7.5 5.1h6.3', 'M2.2 10.9h6.5', 'M11.7 10.9h2.1'] },
+      layers: { paths: ['M8 2.2l5.6 2.9L8 8 2.4 5.1z', 'M2.4 8.1L8 11l5.6-2.9'] },
+      db: { paths: ['M2.6 4.3c0-.9 2.4-1.6 5.4-1.6s5.4.7 5.4 1.6', 'M2.6 4.3v7.4c0 .9 2.4 1.6 5.4 1.6s5.4-.7 5.4-1.6V4.3', 'M2.6 8c0 .9 2.4 1.6 5.4 1.6s5.4-.7 5.4-1.6'] },
+      grid: { rects: [[2.6, 2.6, 4.6, 4.6, 1], [8.8, 2.6, 4.6, 4.6, 1], [2.6, 8.8, 4.6, 4.6, 1], [8.8, 8.8, 4.6, 4.6, 1]] },
+      hexagon: { paths: ['M8 2l5.2 3v6L8 14l-5.2-3V5z'] },
+      dot: { circles: [[8, 8, 5.4]] },
+    }
+
+    /** 渲染一个语义图标。 */
+    function GlyphIcon({ size, name }) {
+      const spec = GLYPH[name] || GLYPH.dot
+      const s = size || ICON
+      const kids = []
+      ;(spec.rects || []).forEach((r, i) =>
+        kids.push(h('rect', { key: 'r' + i, x: r[0], y: r[1], width: r[2], height: r[3], rx: r[4] || 0 })),
+      )
+      ;(spec.circles || []).forEach((c, i) => kids.push(h('circle', { key: 'c' + i, cx: c[0], cy: c[1], r: c[2] })))
+      ;(spec.paths || []).forEach((d, i) => kids.push(h('path', { key: 'p' + i, d })))
+      return h(
+        'svg',
+        {
+          width: s,
+          height: s,
+          viewBox: '0 0 16 16',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: 1.25,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          'aria-hidden': 'true',
+        },
+        kids,
+      )
+    }
+
+    /**
+     * 关键词 → 图标。按 `kind` 与标题（含中英）一起匹配，先匹配先得。
+     * 顺序有意义：更具体的规则放前面（例如 gallery 先于 studio）。
+     */
+    const ICON_RULES = [
+      [/image|photo|picture|gallery|canvas|图像|图片|图库|画廊|画布|绘画|出图/, 'image'],
+      [/git|diff|commit|branch|版本|变更|分支|提交/, 'git'],
+      [/terminal|shell|console|终端|命令行|控制台/, 'terminal'],
+      [/task|todo|automation|schedule|任务|待办|计划|定时|自动化/, 'tasks'],
+      [/memory|context|mnemon|viking|记忆|上下文|知识库/, 'db'],
+      [/browser|web(?!hook)|url|网页|浏览|浏览器/, 'globe'],
+      [/search|find|query|搜索|检索|查找/, 'search'],
+      [/chart|usage|metric|token|stat|统计|用量|图表|分析/, 'chart'],
+      [/settings|config|preference|theme|palette|设置|配置|偏好|主题|配色/, 'sliders'],
+      [/skill|prompt|persona|技能|提示词|角色/, 'sparkle'],
+      [/mcp|server|protocol|插件|扩展|协议|服务/, 'plug'],
+      [/code|dev|develop|开发|源码|代码/, 'code'],
+      [/chat|message|session|conversation|对话|会话|消息/, 'chat'],
+      [/doc|note|readme|markdown|文档|笔记|说明/, 'doc'],
+      [/file|asset|resource|folder|文件|资源|目录/, 'file'],
+      [/db|data|sql|数据库|数据/, 'db'],
+    ]
+
+    /** 无关键词命中时的中性图标池：按 kind 哈希取，保证不同条目不会长成同一个。 */
+    const NEUTRAL_ICONS = ['layers', 'grid', 'hexagon', 'dot']
+
+    /** 给一个条目挑默认图标名（纯函数，便于测试）。 */
+    function pickIconName(kind, title) {
+      const hay = String(kind || '') + ' ' + String(title || '')
+      const s = hay.toLowerCase()
+      for (let i = 0; i < ICON_RULES.length; i++) {
+        if (ICON_RULES[i][0].test(s)) return ICON_RULES[i][1]
+      }
+      const key = String(kind || title || '')
+      let sum = 0
+      for (let i = 0; i < key.length; i++) sum = (sum * 31 + key.charCodeAt(i)) % 100003
+      return NEUTRAL_ICONS[sum % NEUTRAL_ICONS.length]
+    }
+
+    /** 条目的语义默认图标元素。 */
+    function defaultIcon(kind, title, size) {
+      return h(GlyphIcon, { size: size || ICON, name: pickIconName(kind, title) })
+    }
+
+    /** 外部条目图标：抛错时回落到调用方给的默认图标。 */
+    function safeIcon(IconComp, size, fallback) {
       try {
-        return h(IconComp, { size })
+        const el = h(IconComp, { size })
+        return el || fallback || h(CubeIcon, { size })
       } catch (e) {
-        return h(CubeIcon, { size })
+        return fallback || h(CubeIcon, { size })
       }
     }
 
@@ -882,7 +984,11 @@ window.__ModuleLoader__.load({
             h(
               'span',
               { style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: ICON, height: ICON } },
-              entry.icon && typeof entry.icon === 'function' ? safeIcon(entry.icon, ICON) : h(CubeIcon, { size: ICON }),
+              // 条目自带图标就用自带的（可能是彩色位图/SVG，不改造）；
+              // 没带图标则按 kind/title 语义给一个，避免所有条目都长成同一个立方体。
+              entry.icon && typeof entry.icon === 'function'
+                ? safeIcon(entry.icon, ICON, defaultIcon(entry.kind, title, ICON))
+                : defaultIcon(entry.kind, title, ICON),
             ),
           ),
         )

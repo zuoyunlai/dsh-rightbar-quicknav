@@ -281,3 +281,95 @@ test('条目为空时不声明 toolbar（空工具栏不合语义）', () => {
   walk(tree)
   assert.ok(!roles.includes('toolbar'), '空态不应声明 toolbar，实际：' + roles.join(','))
 })
+
+/* ---------- 语义默认图标（0.3.8） ---------- */
+
+/**
+ * 收集每个按钮里「语义图标」的名字。
+ * 铁路渲染出的是 <GlyphIcon name=... />（组件元素，不是 svg），
+ * 所以按 props.name 取即可；宿主自带图标的条目会命中 __isHostIcon。
+ */
+function iconNamesPerButton(node) {
+  const out = []
+  const scan = (x) => {
+    const names = []
+    let host = false
+    const walk = (y) => {
+      if (!y || typeof y !== 'object') return
+      if (Array.isArray(y)) return y.forEach(walk)
+      if (typeof y.type === 'function' && y.type.__isHostIcon) host = true
+      if (y.props && typeof y.props.name === 'string') names.push(y.props.name)
+      ;(y.children || []).forEach(walk)
+    }
+    walk(x)
+    return { names, host }
+  }
+  const walkButtons = (x) => {
+    if (!x || typeof x !== 'object') return
+    if (Array.isArray(x)) return x.forEach(walkButtons)
+    if (x.type === 'button') out.push(scan(x))
+    ;(x.children || []).forEach(walkButtons)
+  }
+  walkButtons(node)
+  return out
+}
+
+test('没有自带图标时，按 kind/标题给出不同语义图标', () => {
+  const entries = [
+    { kind: 'image-studio', title: '图像工作台' },
+    { kind: 'files', title: '文件' },
+    { kind: 'git', title: 'Git' },
+  ]
+  const { mod, React } = loadPlugin(entries)
+  const ctx = makeCtx(entries)
+  mod.apply(ctx)
+  ctx.slots.__cb()
+  const rail = ctx.__registered.find((r) => r.slot === 'shell.overlay')
+  const { tree, errors } = renderRail(React, rail, { ctx })
+  assert.deepEqual(errors, [], '渲染不得抛错')
+
+  const got = iconNamesPerButton(tree)
+  assert.equal(got.length, 3, '收起态应有 3 个条目')
+  const names = got.map((g) => g.names[0])
+  assert.deepEqual(names, ['image', 'file', 'git'], '语义映射不符：' + names.join(','))
+  assert.equal(new Set(names).size, 3, '三个条目的图标不应相同')
+  assert.ok(
+    got.every((g) => g.names.length === 1),
+    '每个条目只应有一个图标',
+  )
+})
+
+test('条目自带图标时优先用自带的，不注入语义图标', () => {
+  const hostIcon = () => null
+  hostIcon.__isHostIcon = true
+  const entries = [
+    { kind: 'image-studio', title: '图像工作台', icon: hostIcon },
+    { kind: 'files', title: '文件' },
+    { kind: 'git', title: 'Git' },
+  ]
+  const { mod, React } = loadPlugin(entries)
+  const ctx = makeCtx(entries)
+  // guide() 需要把 icon 透传出来
+  const origGet = ctx.get.bind(ctx)
+  ctx.get = (name) => {
+    if (name !== 'sidebarRightTabs') return origGet(name)
+    return {
+      guide: () => entries.map((e, i) => ({ id: 'e' + i, kind: e.kind, providerId: 'p', title: () => e.title, icon: e.icon })),
+      subscribe: () => () => {},
+    }
+  }
+  mod.apply(ctx)
+  ctx.slots.__cb()
+  const rail = ctx.__registered.find((r) => r.slot === 'shell.overlay')
+  const { tree } = renderRail(React, rail, { ctx })
+
+  const got = iconNamesPerButton(tree)
+  assert.equal(got.length, 3)
+  assert.ok(got[0].host === true, '第一个条目应使用宿主自带图标')
+  assert.equal(got[0].names.length, 0, '自带图标时不应再叠一个语义图标')
+  assert.deepEqual(
+    got.slice(1).map((g) => g.names[0]),
+    ['file', 'git'],
+    '其余条目仍用语义图标',
+  )
+})
