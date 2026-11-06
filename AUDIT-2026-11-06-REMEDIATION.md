@@ -180,6 +180,27 @@
 > **教训**：浮层与背景的区分手段要按模式选方向 —— 深色模式「提亮」、亮色模式「压暗」。
 > 用 JS 混色（而非 `color-mix`）的好处是：能同时算出尖头需要的同色值，且不依赖宿主浏览器对 `color-mix` 的支持。
 
+### 第六轮（0.3.7）：国际化兜底
+
+> 起因：清单投递后需要回答「DSH 是英文版会不会正常显示英文」。核对代码后发现**能正常显示**，
+> 但有两个兜底缺口，顺手收掉。
+
+| 项 | 原状 | 处置 | 状态 |
+|---|---|---|---|
+| 语言判定方向 | `en` 开头算英文，**否则中文** → 宿主以后加的语言（ja/es…）会显示中文 | 改为**只有 `zh` 开头算中文，其余一律英文** | ✅ |
+| locale 服务缺失 | 无条件回落到中文 | 回落 `navigator.language`（`zh*` → 中文，其余英文） | ✅ |
+| 挂载瞬间 | `LANG` 初值写死 `zh` | 初值改为系统语言，`t()` 首次调用即正确 | ✅ |
+
+**核实过程（可复核）**：`getSnapshot().active` 是**字符串**（`'zh'` / `'en'`）这一点，
+不是靠猜 —— 在 profile 的 `node_modules` 里交叉比对了 8 个同族插件的实际用法：
+`dsh-image-gen` / `dsh-remotion` / `dsh-hyperframes` / `dsh-agency-agents` / `dsh-better-sidebar` /
+`@yolk_vat-y/dsh-project-memory` / `dsh-mnemon` / `dsh-prompt` 全部按字符串处理（多数用 `active?.startsWith('en')`）。
+
+**踩坑（本次真实发生）**：用 PowerShell `Get-Content -Raw | -replace | Set-Content` 改 `client.js` 里的中文时，
+**整个文件的中文被按 ANSI 写了回去**（`'右侧栏快捷导航'` → `'右侧栏快捷导�?'`），`node --check` 直接报语法错。
+处置：`git checkout -- client.js` 还原，改用编辑工具（UTF-8 安全）重做三处改动。
+**判据**：含中文的源文件**永远不要**用 PowerShell 的 Get-Content/Set-Content 往返，改完必须再 `node --check` + 校验 DICT 字符串。
+
 ---
 
 ## 四、批次三：工程规范（0.3.0 → 0.3.1）

@@ -45,7 +45,7 @@ window.__ModuleLoader__.load({
     /* ================= 常量 ================= */
 
     const TAG = '[dsh-rightbar-quicknav]'
-    const VERSION = '0.3.6'
+    const VERSION = '0.3.7'
 
     /** 每格图标按钮边长 / 轨道内边距 / 图标本身。 */
     const ITEM = 26
@@ -88,8 +88,26 @@ window.__ModuleLoader__.load({
       },
     }
 
-    /** 当前界面语言（由 locale 服务探测，探测不到按中文）。 */
-    let LANG = 'zh'
+    /**
+     * 探测系统语言：locale 服务不可用时的兜底。
+     * 只有明确是中文才用中文，**其余一律英文** —— 面向国际用户，
+     * 「未知语言显示中文」比「显示英文」更容易让人看不懂。
+     */
+    function navLang() {
+      try {
+        const l = typeof navigator !== 'undefined' && navigator.language ? String(navigator.language).toLowerCase() : ''
+        return l.indexOf('zh') === 0 ? 'zh' : 'en'
+      } catch (e) {
+        return 'en'
+      }
+    }
+
+    /**
+     * 当前界面语言。
+     * 初值取系统语言（不依赖 ctx），随后由 locale 服务探测覆盖；
+     * 宿主语言以 'zh' 开头才算中文，其余（en / en-US / 未来新增的 ja、es…）都用英文。
+     */
+    let LANG = navLang()
 
     /** 轨道实例序号：保证同一 profile 下多个实例的 DOM id 不重复。 */
     let instanceSeq = 0
@@ -287,8 +305,10 @@ window.__ModuleLoader__.load({
           try {
             const loc = serviceOf(ctx, 'locale')
             const snap = loc && typeof loc.getSnapshot === 'function' ? loc.getSnapshot() : null
-            const active = snap && snap.active ? String(snap.active) : ''
-            const next = active && active.toLowerCase().indexOf('en') === 0 ? 'en' : 'zh'
+            const active = snap && snap.active ? String(snap.active).toLowerCase() : ''
+            // 宿主有语言偏好就听宿主的：只有 zh* 算中文，其余一律英文
+            // （含 en / en-US 以及宿主以后新增的 ja、es 等，都比中文更可能被看懂）
+            const next = active ? (active.indexOf('zh') === 0 ? 'zh' : 'en') : navLang()
             if (next !== LANG) {
               LANG = next
               setLangTick((n) => n + 1)

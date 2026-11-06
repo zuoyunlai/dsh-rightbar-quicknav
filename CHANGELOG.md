@@ -2,6 +2,23 @@
 
 本文件记录 dsh-rightbar-quicknav 的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.3.7] — 2026-11-06
+
+国际化兜底修正。
+
+### 变更
+
+- **未知语言一律回落英文**（原来回落中文）：语言判定从「`en` 开头才算英文，否则中文」改为「**只有 `zh` 开头才算中文，其余一律英文**」。
+  宿主当前只有 zh / en 两语，这条改动的意义在于：宿主以后新增的语言（ja、es…）以及任何意外取值，都会显示英文而不是中文——对已经进入国际社区榜单的插件，这个方向更安全。
+- **`navigator.language` 兜底**：宿主 locale 服务不可用时（老宿主 / 服务缺失），按系统语言判断中英，而不是无条件中文。
+  `LANG` 的初值也改成系统语言，避免挂载瞬间用错词典。
+
+### 现状说明
+
+界面上真正会随语言变化的只有 5 条文案（`rail.ariaLabel` / `rail.anchorLabel` / `rail.empty` / `rail.noService` / `rail.openFailed`）；
+轨道里图标的**名称来自宿主自己的标签注册表**（`sidebarRightTabs.guide()`），英文宿主下本来就是英文。
+`locale/*.json` 只承载插件在宿主插件列表里的 `meta.title` / `meta.description`，不含运行时文案。
+
 ## [0.3.6] — 2026-11-06
 
 气泡配色改为「相对主栏的明度微调」，并去掉边框。
