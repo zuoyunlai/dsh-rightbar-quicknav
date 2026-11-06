@@ -13,13 +13,22 @@
 | 榜单 | 收录方式 | 本次改动 | 状态 |
 |---|---|---|---|
 | [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)（22.6k★） | PR 加 `data/plugins/<owner>__<repo>.yml` | `data/plugins/zuoyunlai__dsh-rightbar-quicknav.yml`（+6） | ⏳ 待提交：该榜要求**被收录仓库创建满 1 天**，本仓库 `2026-11-05T17:45Z` 建仓，`2026-11-07 01:45 +08` 达标；分支已备好，定时任务 `automation_302fe030` 于 `02:10` 提交 |
-| [Alex-Yanggg/awesome-DSH-plugin](https://github.com/Alex-Yanggg/awesome-DSH-plugin)（104★） | PR：`catalog/plugins.json` + `README.md` | `README.md` (+2)、`catalog/plugins.json` (+6) | ✅ [#180](https://github.com/Alex-Yanggg/awesome-DSH-plugin/pull/180) |
-| [beancookie/awesome-dsh-plugin](https://github.com/beancookie/awesome-dsh-plugin)（188★） | PR：`README.md` + `README.en.md`（按 owner/repo 字母序） | 各 +1 行 | ✅ [#267](https://github.com/beancookie/awesome-dsh-plugin/pull/267) |
-| [kejixiaoliang/awesome-dsh-plugins](https://github.com/kejixiaoliang/awesome-dsh-plugins)（75★） | PR：`plugins/ui-themes.md` + `data/descriptions-en.json` | `ui-themes.md` (+1)、`descriptions-en.json` (+2/-1) | ✅ [#195](https://github.com/kejixiaoliang/awesome-dsh-plugins/pull/195) |
-| [billLiao/awesome-dsh-plugin](https://github.com/billLiao/awesome-dsh-plugin)（17★） | PR：`categories/ui-enhancements.md` | +1 行 | ✅ [#31](https://github.com/billLiao/awesome-dsh-plugin/pull/31) |
-| [bruc3van/awesome-dsh-plugin](https://github.com/bruc3van/awesome-dsh-plugin)（498★） | 自荐 `SHOWCASE.md`（中英各一行） | — | ⛔ 不发：该榜硬性要求自荐仓库 **star > 10**，当前 0；但它每天自动抓 `dsh-plugin` topic，本仓库已带 topic，会被自动收录 |
-| [dshworks/awesome-dsh-plugins](https://github.com/dshworks/awesome-dsh-plugins)（31★） | PR：`data/plugins.json` | — | ⏭ 不发：注册表是 **19.7 MB / 3 万条**机器生成文件，且有 `candidates/seeds/rejected` 扫描管线，手改条目很可能被下次重生成覆盖；同样靠 topic 自动扫描 |
-| [dataelement/awesome-dsh-workbench](https://github.com/dataelement/awesome-dsh-workbench)（9★） | PR：`data/workbenches/<owner>__<repo>.yml` | — | ⏸ 暂缓：要求提供**最终可安装版本的本机实拍截图** HTTPS 地址，目前没有托管在仓库里的截图资产 |
+| [bruc3van/awesome-dsh-plugin](https://github.com/bruc3van/awesome-dsh-plugin)（498★） | 每天自动抓 `dsh-plugin` topic + 逐个复核 | — | ✅ **已自动批准**：`data/approved.json` 里 `"zuoyunlai/dsh-rightbar-quicknav": "2026-11-06"` |
+| [beancookie/awesome-dsh-plugin](https://github.com/beancookie/awesome-dsh-plugin)（188★） | PR：`README.md` + `README.en.md`（按 owner/repo 字母序） | 各 +1 行 | ⏳ [#267](https://github.com/beancookie/awesome-dsh-plugin/pull/267) OPEN，等维护者（仓库活跃） |
+| [Alex-Yanggg/awesome-DSH-plugin](https://github.com/Alex-Yanggg/awesome-DSH-plugin)（104★） | PR：`catalog/plugins.json` + `README.md` | `README.md` (+2)、`catalog/plugins.json` (+6) | ⏳ [#180](https://github.com/Alex-Yanggg/awesome-DSH-plugin/pull/180) OPEN —— ⚠️ 该仓库最后推送 `2026-08-15`，已停更约 3 个月，被 review 概率低 |
+| [kejixiaoliang/awesome-dsh-plugins](https://github.com/kejixiaoliang/awesome-dsh-plugins)（75★） | PR：`plugins/ui-themes.md` + `data/descriptions-en.json` | `ui-themes.md` (+1)、`descriptions-en.json` (+2/-1) | ⏳ [#195](https://github.com/kejixiaoliang/awesome-dsh-plugins/pull/195) OPEN，等维护者（仓库活跃） |
+| [billLiao/awesome-dsh-plugin](https://github.com/billLiao/awesome-dsh-plugin)（17★） | **每 8 小时**自动扫 `dsh-plugin` topic 生成分类文件 | PR 被关闭（避免与自动生成冲突） | ✅ **已收录**：维护者确认条目已在 `categories/ui-enhancements.md`，实测文件里能搜到本插件 |
+| [dataelement/awesome-dsh-workbench](https://github.com/dataelement/awesome-dsh-workbench)（9★） | PR：`data/workbenches/<owner>__<repo>.yml`，需实拍截图 | `data/workbenches/zuoyunlai__dsh-rightbar-quicknav.yml`（+9） | ⏳ [#73](https://github.com/dataelement/awesome-dsh-workbench/pull/73) OPEN |
+| [dshworks/awesome-dsh-plugins](https://github.com/dshworks/awesome-dsh-plugins)（31★） | **无需 PR**：定时 workflow 扫 topic 进 `data/candidates.json`，维护者用 `npm run triage` 收录 | — | ⏭ 不投：其 CONTRIBUTING 明确「Nothing is promoted automatically」，手改 `plugins.json` 会被重生成覆盖；已满足其硬规则（`dsh.bundle` + `engines.dsh` 为字符串 + 真实代码 + topic），等其扫描即可 |
+
+---
+
+## 一之二、结论：topic 比 PR 更有效
+
+三个「已收录/已批准」的榜单（bruc3van、billLiao、以及 dshworks 的待扫）**都是靠仓库上的 `dsh-plugin` topic 被自动发现**，没有走 PR。
+反过来说：**新插件建仓后的第一件事应该是打这个 topic**，它比逐个投 PR 覆盖面更广。
+
+PR 仍然必要的是那些**人工维护**的分类榜单：主榜、beancookie、kejixiaoliang、Alex-Yanggg、dataelement。
 
 ---
 
@@ -49,6 +58,23 @@ Alex-Yanggg 的仓库叫 `awesome-DSH-plugin`，我按「fork 名 = 上游 repo 
 3. 另外两家同名仓库（beancookie、billLiao）从一开始就用了 `awesome-dsh-plugin-beancookie` / `awesome-dsh-plugin-billLiao`，未受影响。
 
 **判据**：fork 前先 `GET /repos/<me>/<name>` 并核对返回的 `parent.full_name`；**判同靠 parent，不靠名字**。同名上游一律给 fork 起不同名字。
+
+### 坑 3：20 MB 级文件在本机链路上根本传不动（dshworks）
+
+本机对 GitHub 的单次 HTTP 传输在 **~8 MB** 处被切断（`curl: schannel: server closed abruptly`、node `fetch` 报
+`ResponseContentLengthMismatchError`），而 `api.github.com` 的内容接口**不支持 Range**（`curl: (33) ... does not support byte ranges`），
+`--compressed` 也救不了（断在解压后的同一位置）。
+
+结论：`dshworks` 的 `data/plugins.json`（19.7 MB / 3 万条）**既下不下来也传不上去**（上传还要 base64 成 ~26 MB）。
+但事后读它的 CONTRIBUTING 发现本来就**不该手改**：该文件由定时 workflow 扫描 topic 自动排队、维护者 `npm run triage` 收录，
+"Nothing is promoted automatically"。所以这条**不是失败，是走错了路**——正确做法是保证 topic 与 `engines.dsh` 合规，等它自己扫。
+
+**判据**：动手改「机器生成的大文件」之前，先读该仓库的 CONTRIBUTING 确认**谁写它**；若由 CI/流水线生成，PR 大概率被覆盖。
+
+### 坑 4：自动收录不等于 PR 被合并（billLiao）
+
+`billLiao/awesome-dsh-plugin` 每 8 小时扫 `dsh-plugin` topic 重新生成 `categories/*.md`。我们投的 PR 被维护者**关闭**，
+理由：条目已经被自动同步收录，手写 PR 会与生成物冲突。**目标达成，但合并记录为 0** —— 判收录要看**文件里有条目**，不是看 PR 状态。
 
 ---
 
