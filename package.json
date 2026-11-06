@@ -1,6 +1,6 @@
 {
   "name": "dsh-rightbar-quicknav",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "DSH 右侧栏快捷导航：在顶栏展开右侧栏图标正下方常驻一条竖排图标轨，只显示标签图标（文件 / Git / 任务管理 / 图像工作台…），悬停出标题，点击直达该标签。",
   "type": "module",
   "main": "index.js",

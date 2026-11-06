@@ -2,6 +2,31 @@
 
 本文件记录 dsh-rightbar-quicknav 的版本变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.3.9] — 2026-11-06
+
+发版链路迁移到 npm Trusted Publishing（OIDC）。代码内容与 0.3.8 相同。
+
+### 为什么要换 0.3.9
+
+`0.3.8` 用本机 token 发布时被 npm 收进了**暂存发布（staged publish）队列**等 2FA 确认：
+注册表公开元数据里查不到它、`npm stage list` 也列不出（该 token 无查看权限），
+再次发布直接 `409 Cannot publish over previously staged version "0.3.8"`。
+包的首个版本（0.3.6）能直接落地，从第二个版本起就要求 2FA。
+本地 token 无法代替人工确认，所以：
+
+- `0.3.8` 停在暂存态，**从未公开**，作废不复用；
+- `0.3.9` 内容与 0.3.8 一致，改由 CI 用 OIDC 发布，绕开 2FA。
+
+### 变更
+
+- 新增 `.github/workflows/publish.yml`：推 `v*` tag 时用 **npm Trusted Publishing（OIDC）** 发布，
+  不需要 `NPM_TOKEN`、不受「发布需 2FA」限制，并顺带 `--provenance` 生成来源证明；
+  发布成功后自动 `npm pack` 并把 tgz 上传到 GitHub Release（`--latest`）。
+- 新增两个发版辅助脚本：
+  - `scripts/verify-version.mjs` — 断言 tag == `v{package.json version}` 且与 `client.js` 的 `VERSION` 一致；
+  - `scripts/release-notes.mjs` — 从 CHANGELOG 抽出当前版本一节作为 Release 说明。
+- **本地不再执行 `npm publish`**：本机 token 只会把版本推进暂存队列。
+
 ## [0.3.8] — 2026-11-06
 
 语义默认图标：没有自带图标的条目不再共用同一个立方体。

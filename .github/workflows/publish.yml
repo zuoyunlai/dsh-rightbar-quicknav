@@ -1,0 +1,56 @@
+name: Publish
+
+# 只在推版本 tag 时发布；日常提交只跑 Test。
+# 走 npm Trusted Publishing（OIDC）：CI 用一次性身份换取短期发布凭据，
+# 不需要 NPM_TOKEN，也不受「发布需 2FA」限制 —— 本地绝不 npm publish。
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write # 建 GitHub Release + 上传 tgz
+  id-token: write # OIDC：Trusted Publishing 必需
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted Publishing 需要 npm >= 11.5.1
+      - name: Upgrade npm
+        run: npm install -g npm@^11.5.1
+
+      - name: Tag must match package.json and client.js
+        run: node scripts/verify-version.mjs
+
+      - name: Checks
+        run: |
+          node --check client.js
+          node --check index.js
+          node --test tests/*.test.mjs
+
+      # 不传 NODE_AUTH_TOKEN：npm 会用 GitHub 的 OIDC token 向 npm 换取短期发布权限
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+
+      - name: Pack release asset
+        run: npm pack
+
+      - name: Build release notes from CHANGELOG
+        run: node scripts/release-notes.mjs
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" ./*.tgz \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file release-notes.md \
+            --latest

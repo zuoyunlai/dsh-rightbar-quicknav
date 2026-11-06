@@ -45,7 +45,7 @@ window.__ModuleLoader__.load({
     /* ================= 常量 ================= */
 
     const TAG = '[dsh-rightbar-quicknav]'
-    const VERSION = '0.3.8'
+    const VERSION = '0.3.9'
 
     /** 每格图标按钮边长 / 轨道内边距 / 图标本身。 */
     const ITEM = 26
