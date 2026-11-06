@@ -8,24 +8,27 @@
 
 ### 为什么要换 0.3.9
 
-`0.3.8` 用本机 token 发布时被 npm 收进了**暂存发布（staged publish）队列**等 2FA 确认：
-注册表公开元数据里查不到它、`npm stage list` 也列不出（该 token 无查看权限），
-再次发布直接 `409 Cannot publish over previously staged version "0.3.8"`。
-包的首个版本（0.3.6）能直接落地，从第二个版本起就要求 2FA。
-本地 token 无法代替人工确认，所以：
+`0.3.8` 用本机 token 发布时先进入了 npm 的**处理队列**（CLI 输出 "Your package is being processed"，
+注册表公开元数据里立刻查不到，再发一次报 `409 Cannot publish over previously staged version`）。
+事后确认这是**队列延迟**而非等待人工确认：0.3.8 在提交后约 8 分钟自动转正上线。
 
-- `0.3.8` 停在暂存态，**从未公开**，作废不复用；
-- `0.3.9` 内容与 0.3.8 一致，改由 CI 用 OIDC 发布，绕开 2FA。
+因为当时判断 0.3.8 会卡住，改用 `0.3.9` 承载同样内容并走 OIDC 发布 —— 结果两个版本最终都上线了，
+内容完全相同，`latest` 指向 0.3.9。
 
 ### 变更
 
 - 新增 `.github/workflows/publish.yml`：推 `v*` tag 时用 **npm Trusted Publishing（OIDC）** 发布，
-  不需要 `NPM_TOKEN`、不受「发布需 2FA」限制，并顺带 `--provenance` 生成来源证明；
+  不需要 `NPM_TOKEN`、不受「发布需 2FA」限制，并带 `--provenance` 生成来源证明
+  （实测发布记录 `_npmUser` 为 `GitHub Actions`、`dist.attestations` 存在）。
   发布成功后自动 `npm pack` 并把 tgz 上传到 GitHub Release（`--latest`）。
-- 新增两个发版辅助脚本：
+- **新增「等 npm 真上线」这一步**：`npm publish` 在处理队列期间**也会返回成功**，
+  没有这道等待就会出现「workflow 绿了、npm 上查不到」的静默假成功。
+  现在发布后会轮询 `npm view <pkg>@<ver>`，最多 10 分钟，超时直接判红。
+- 新增三个发版辅助脚本：
   - `scripts/verify-version.mjs` — 断言 tag == `v{package.json version}` 且与 `client.js` 的 `VERSION` 一致；
-  - `scripts/release-notes.mjs` — 从 CHANGELOG 抽出当前版本一节作为 Release 说明。
-- **本地不再执行 `npm publish`**：本机 token 只会把版本推进暂存队列。
+  - `scripts/release-notes.mjs` — 从 CHANGELOG 抽出当前版本一节作为 Release 说明；
+  - `scripts/push-via-api.mjs` — 本机 `github.com:443` 连不上时，走 Git Data API 推送（内容等价，提交 SHA 不同）。
+- **本地不再执行 `npm publish`**：本机 token 只会把版本推进处理队列。
 
 ## [0.3.8] — 2026-11-06
 

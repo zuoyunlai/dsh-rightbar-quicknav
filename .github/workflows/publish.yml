@@ -40,6 +40,22 @@ jobs:
       - name: Publish to npm
         run: npm publish --access public --provenance
 
+      # npm 会把新版本先放进处理队列（可能几分钟），此期间 `npm publish` 也算成功。
+      # 没有这道等待，「workflow 绿了但 npm 上查不到」会静默通过。
+      - name: Wait until npm actually serves this version
+        run: |
+          v=$(node -p "require('./package.json').version")
+          for i in $(seq 1 40); do
+            if npm view "dsh-rightbar-quicknav@$v" version >/dev/null 2>&1; then
+              echo "✓ $v is live on npm"
+              exit 0
+            fi
+            echo "… $v not published yet ($i/40), waiting 15s"
+            sleep 15
+          done
+          echo "✗ $v did not become available on npm within 10 minutes"
+          exit 1
+
       - name: Pack release asset
         run: npm pack
 

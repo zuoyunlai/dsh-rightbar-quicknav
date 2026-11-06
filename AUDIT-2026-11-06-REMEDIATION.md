@@ -217,6 +217,25 @@
 
 **测试**：新增 2 条回归（语义映射正确且三者互不相同 / 自带图标优先且不叠加），合计 5 条全绿。
 
+### 第八轮（0.3.9）：发版链路迁到 OIDC + 「假绿」防护
+
+> 起因：0.3.8 本地发布被 npm 放进处理队列，CLI 报成功但注册表查不到；改走 OIDC 后同样遇到。
+
+| 项 | 现象 | 根因 | 处置 | 状态 |
+|---|---|---|---|---|
+| npm 发布「假绿」 | `npm publish` 打印成功，注册表 `versions` 里没有新版本 | npm 把新版本放进**处理队列**，队列期间 CLI 即返回成功；0.3.8 约 8 分钟后才真正上线 | workflow 增加「轮询 `npm view <pkg>@<ver>` 最多 10 分钟，超时判红」 | ✅ |
+| 本地发布被要求 2FA | 本机 token 发布进入队列/报 `409 previously staged version` | 包设置允许「2FA 或 bypass-2fa token」，本机 token 无 bypass | 迁到 **Trusted Publishing（OIDC）**；本地不再 publish | ✅ |
+| tag 与版本不一致的风险 | — | 手工打 tag 容易与 package.json 漂移 | `scripts/verify-version.mjs`：tag == `v{version}` == `client.js VERSION` | ✅ |
+| 本机 github.com:443 不通 | `git push` 三次全失败（21s 超时） | 本机网络 | `scripts/push-via-api.mjs`：Git Data API 推送，内容等价（tree 哈希相同）、提交 SHA 不同 | ✅ |
+
+**发布结果核验（可复核）**：`npm view dsh-rightbar-quicknav@0.3.9` →
+`_npmUser = GitHub Actions`（证明是 CI/OIDC 发布）、`dist.attestations` 存在（来源证明）、
+Release 资产 `dsh-rightbar-quicknav-0.3.9.tgz` 的 SHA1 与 npm `dist.shasum` **逐字节相同**。
+
+**教训**：**「命令成功」不等于「结果生效」**。凡是异步落地的动作（npm 处理队列、CDN 传播、镜像同步），
+验收必须查**结果面**（注册表里有没有这个版本），而不是查**命令面**（退出码、CLI 输出）。
+这与前面「registry 显示 0.0.0-stage 而非 404」「npmmirror 元数据滞后」是同一类问题的三种表现。
+
 ---
 
 ## 四、批次三：工程规范（0.3.0 → 0.3.1）
