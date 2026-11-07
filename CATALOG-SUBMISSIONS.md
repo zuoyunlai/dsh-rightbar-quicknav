@@ -12,13 +12,13 @@
 
 | 榜单 | 收录方式 | 本次改动 | 状态 |
 |---|---|---|---|
-| [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)（22.6k★） | PR 加 `data/plugins/<owner>__<repo>.yml` | `data/plugins/zuoyunlai__dsh-rightbar-quicknav.yml`（+6） | ⏳ 待提交：该榜要求**被收录仓库创建满 1 天**，本仓库 `2026-11-05T17:45Z` 建仓，`2026-11-07 01:45 +08` 达标；分支已备好，定时任务 `automation_302fe030` 于 `02:10` 提交 |
+| [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)（22.6k★） | PR 加 `data/plugins/<owner>__<repo>.yml` | `data/plugins/zuoyunlai__dsh-rightbar-quicknav.yml`（+6） | ✅ **已合并**：[#12754](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/12754) 于 `2026-11-06T20:22Z` 合入；生成后的 README 已能搜到本插件 |
 | [bruc3van/awesome-dsh-plugin](https://github.com/bruc3van/awesome-dsh-plugin)（498★） | 每天自动抓 `dsh-plugin` topic + 逐个复核 | — | ✅ **已自动批准**：`data/approved.json` 里 `"zuoyunlai/dsh-rightbar-quicknav": "2026-11-06"` |
 | [beancookie/awesome-dsh-plugin](https://github.com/beancookie/awesome-dsh-plugin)（188★） | PR：`README.md` + `README.en.md`（按 owner/repo 字母序） | 各 +1 行 | ⏳ [#267](https://github.com/beancookie/awesome-dsh-plugin/pull/267) OPEN，等维护者（仓库活跃） |
 | [Alex-Yanggg/awesome-DSH-plugin](https://github.com/Alex-Yanggg/awesome-DSH-plugin)（104★） | PR：`catalog/plugins.json` + `README.md` | `README.md` (+2)、`catalog/plugins.json` (+6) | ⏳ [#180](https://github.com/Alex-Yanggg/awesome-DSH-plugin/pull/180) OPEN —— ⚠️ 该仓库最后推送 `2026-08-15`，已停更约 3 个月，被 review 概率低 |
 | [kejixiaoliang/awesome-dsh-plugins](https://github.com/kejixiaoliang/awesome-dsh-plugins)（75★） | PR：`plugins/ui-themes.md` + `data/descriptions-en.json` | `ui-themes.md` (+1)、`descriptions-en.json` (+2/-1) | ⏳ [#195](https://github.com/kejixiaoliang/awesome-dsh-plugins/pull/195) OPEN，等维护者（仓库活跃） |
 | [billLiao/awesome-dsh-plugin](https://github.com/billLiao/awesome-dsh-plugin)（17★） | **每 8 小时**自动扫 `dsh-plugin` topic 生成分类文件 | PR 被关闭（避免与自动生成冲突） | ✅ **已收录**：维护者确认条目已在 `categories/ui-enhancements.md`，实测文件里能搜到本插件 |
-| [dataelement/awesome-dsh-workbench](https://github.com/dataelement/awesome-dsh-workbench)（9★） | PR：`data/workbenches/<owner>__<repo>.yml`，需实拍截图 | `data/workbenches/zuoyunlai__dsh-rightbar-quicknav.yml`（+9） | ⏳ [#73](https://github.com/dataelement/awesome-dsh-workbench/pull/73) OPEN |
+| [dataelement/awesome-dsh-workbench](https://github.com/dataelement/awesome-dsh-workbench)（9★） | PR：`data/workbenches/<owner>__<repo>.yml` | 1 个文件（后被我方关闭） | ❌ **不适用**：该榜收的是「工作台类」插件，门禁要求 client **注入 `dsh-desktop-workbenches`**；本插件注入的是 `locale` / `sidebar-right` / `ui-slots`，不是同一类，YAML 怎么写都过不了 |
 | [dshworks/awesome-dsh-plugins](https://github.com/dshworks/awesome-dsh-plugins)（31★） | **无需 PR**：定时 workflow 扫 topic 进 `data/candidates.json`，维护者用 `npm run triage` 收录 | — | ⏭ 不投：其 CONTRIBUTING 明确「Nothing is promoted automatically」，手改 `plugins.json` 会被重生成覆盖；已满足其硬规则（`dsh.bundle` + `engines.dsh` 为字符串 + 真实代码 + topic），等其扫描即可 |
 
 ---
@@ -75,6 +75,20 @@ Alex-Yanggg 的仓库叫 `awesome-DSH-plugin`，我按「fork 名 = 上游 repo 
 
 `billLiao/awesome-dsh-plugin` 每 8 小时扫 `dsh-plugin` topic 重新生成 `categories/*.md`。我们投的 PR 被维护者**关闭**，
 理由：条目已经被自动同步收录，手写 PR 会与生成物冲突。**目标达成，但合并记录为 0** —— 判收录要看**文件里有条目**，不是看 PR 状态。
+
+### 坑 5：投之前先确认「榜单收的是什么类插件」（dataelement）
+
+`dataelement/awesome-dsh-workbench` 的自动门禁直接拒了：**"client 必须注入 `dsh-desktop-workbenches`"**。
+该榜收的是**工作台类**插件（必须与 `dsh-desktop-workbenches` 对接），本插件注入的是 `locale` / `sidebar-right` / `ui-slots`，
+不是同一类，**YAML 怎么写都过不了**。PR 已由我方关闭并致歉。
+
+同一批还有两个同类坑（已记）：
+
+- YAML 值里出现半角 `": "` 必须整值加单引号，否则 `bad indentation of a mapping entry`；
+- 判「是否收录」要看目标文件里有没有条目（billLiao），不能看 PR 的 open/closed。
+
+**判据**：投稿前先读该榜的**收录范围**（收哪一类插件、门禁检查什么），再看格式。
+格式错了能改，**类别错了改不动**。
 
 ---
 
